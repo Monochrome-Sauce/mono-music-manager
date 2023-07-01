@@ -1,0 +1,24 @@
+{
+	"debugger_configurations": [
+		{
+			"cwd": "${folder}",
+			"name": "Launch momuma-tests",
+			"request": "launch",
+			"target": "./build/tests/momuma-tests",
+			"type": "gdb",
+			"valuesFormatting": "parseText",
+		},
+	],
+	"folders": [
+		{
+			"path": ".",
+		},
+	],
+	"settings": {
+		"translate_tabs_to_spaces": false,
+		"LSP": {
+			"clangd": { "enabled": true, },
+			"LSP-pyright": { "enabled": true, },
+		},
+	},
+}
