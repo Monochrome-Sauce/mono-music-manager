@@ -73,6 +73,13 @@ namespace Tab
 		constexpr const char ID[] = "id"; // pk, increment, not null
 		constexpr const char NAME[] = "name"; // unique, not null
 	}
+	
+	constexpr const char DB_VERSION[] = "database_version";
+	namespace DbVersion
+	{
+		constexpr char VERSION[] = "version";
+		constexpr char NOTES[] = "notes";
+	}
 }
 
 namespace Directory
@@ -108,6 +115,15 @@ int create_database_tables(sqlite3 &db)
 		Tab::PLAYLISTS,
 		Tab::Playlists::ID, Tab::Playlists::NAME,
 		Tab::Playlists::ID
+	);
+	query += fmt::format(
+		R"(CREATE TABLE IF NOT EXISTS [{}] (
+			[{}] INTEGER NOT NULL, [{}] TEXT,
+			PRIMARY KEY([{}])
+		) STRICT;)",
+		Tab::DB_VERSION,
+		Tab::DbVersion::VERSION, Tab::DbVersion::NOTES,
+		Tab::DbVersion::VERSION
 	);
 	
 	const int code = sqlite3_exec(&db, query.c_str(), nullptr, nullptr, nullptr);
