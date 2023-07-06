@@ -93,16 +93,21 @@ int create_database_tables(sqlite3 &db)
 	std::string query;
 	query += fmt::format(
 		R"(CREATE TABLE IF NOT EXISTS [{}] (
-			[{}] INTEGER NOT NULL, [{}] INTEGER NOT NULL, [{}] TEXT NOT NULL
+			[{}] INTEGER NOT NULL REFERENCES [{}({})],
+			[{}] INTEGER NOT NULL, [{}] TEXT NOT NULL
 		) STRICT;)",
-		Tab::FILES, Tab::Files::PLAYLIST_ID, Tab::Files::INDEX, Tab::Files::NAME
+		Tab::FILES,
+		Tab::Files::PLAYLIST_ID, Tab::PLAYLISTS, Tab::Playlists::ID,
+		Tab::Files::INDEX, Tab::Files::NAME
 	);
 	query += fmt::format(
-		R"(CREATE TABLE IF NOT EXISTS [{0}] (
-			[{1}] INTEGER NOT NULL, [{2}] TEXT NOT NULL,
-			PRIMARY KEY([{1}] AUTOINCREMENT)
+		R"(CREATE TABLE IF NOT EXISTS [{}] (
+			[{}] INTEGER NOT NULL, [{}] TEXT NOT NULL,
+			PRIMARY KEY([{}] AUTOINCREMENT)
 		) STRICT;)",
-		Tab::PLAYLISTS, Tab::Playlists::ID, Tab::Playlists::NAME
+		Tab::PLAYLISTS,
+		Tab::Playlists::ID, Tab::Playlists::NAME,
+		Tab::Playlists::ID
 	);
 	
 	const int code = sqlite3_exec(&db, query.c_str(), nullptr, nullptr, nullptr);
