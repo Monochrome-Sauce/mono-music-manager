@@ -15,9 +15,13 @@ class Sqlite3 final : public IDatabase
 public:
 	Sqlite3(Sqlite3&&);
 	
+	enum class StorageType { DISK, MEMORY };
+	
 	/* #Creates (if doesn't already exist) new database inside of the folder `fullFolderPath`.
+	! @param fullFolderPath: path to the root folder of the database, created if doesn't exist.
+	! @param storage: store the database on disk or in memory.
 	*/
-	Sqlite3(const FilePath &fullFolderPath);
+	Sqlite3(const FilePath &fullFolderPath, StorageType storage = StorageType::DISK);
 	
 	virtual ~Sqlite3(void) override;
 	

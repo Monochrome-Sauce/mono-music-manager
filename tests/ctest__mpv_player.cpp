@@ -1,7 +1,6 @@
-#define CATCH_CONFIG_FAST_COMPILE
-#include <catch2/catch.hpp>
 #include <momuma/spdlog.h>
 
+#include "catch2_main.h"
 #include "MpvPlayer.h"
 
 

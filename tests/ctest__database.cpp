@@ -1,20 +1,17 @@
-#define CATCH_CONFIG_FAST_COMPILE
-#include <catch2/catch.hpp>
 #include <momuma/spdlog.h>
 
+#include "catch2_main.h"
 #include "Database-Sqlite3.h"
 
 
-const std::array<fs::path, 2> TEST_MEDIA = {
-	fs::path(TESTING_PATH) / "Bamboo Hit.mp3",
-	fs::path(TESTING_PATH) / "Hare Hare Yukai.mp3",
-};
+namespace Db = Momuma::Database;
 
-static inline Momuma::Database::Sqlite3 make_database(void)
+
+[[nodiscard]] static inline
+Db::Sqlite3 make_database(void)
 {
-	return Momuma::Database::Sqlite3("");
+	return Db::Sqlite3(TESTING_PATH, Db::Sqlite3::StorageType::MEMORY);
 }
-
 
 TEST_CASE("db test", "[query]")
 {

@@ -22,8 +22,6 @@ test_env = environment({
 	'LSAN_OPTIONS': f'suppressions=@source_code_root@/sanitizer-blacklist.txt'
 })
 
-test_sources = files('catch_main.cpp')
-
 
 ################################################################################
 # Executable tests
@@ -33,7 +31,7 @@ mpv_player_test_exe = executable('mpv_player',
 	dependencies: test_deps,
 	implicit_include_directories : true,
 	include_directories: include_directory,
-	sources: test_sources + 'ctest__mpv_player.cpp',
+	sources: 'ctest__mpv_player.cpp',
 )
 
 database_test_exe = executable('database',
@@ -41,12 +39,12 @@ database_test_exe = executable('database',
 	dependencies: test_deps,
 	implicit_include_directories : true,
 	include_directories: include_directory,
-	sources: test_sources + 'ctest__database.cpp',
+	sources: 'ctest__database.cpp',
 )
 
 
 ################################################################################
 # Tests
 
-test('mpv_player', database_test_exe, env: test_env, timeout: 120)
+test('mpv_player', mpv_player_test_exe, env: test_env, timeout: 120)
 test('database', database_test_exe, env: test_env)

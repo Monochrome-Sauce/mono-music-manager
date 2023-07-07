@@ -92,29 +92,26 @@ namespace Directory
 
 
 [[nodiscard]] static
-int create_and_open_database(sqlite3 *&handleRef, const fs::path &fullFolderPath)
-{
+int create_and_open_database(
+	sqlite3 *&handleRef, const fs::path &fullFolderPath, const Sqlite3::StorageType storage
+) {
 	assert(sqlite3_libversion_number() == SQLITE_VERSION_NUMBER);
 	assert(strncmp(sqlite3_sourceid(), SQLITE_SOURCE_ID, std::size(SQLITE_SOURCE_ID)) == 0);
 	assert(strcmp(sqlite3_libversion(), SQLITE_VERSION) == 0);
-	
-	constexpr auto DB_OPEN_BITS =
-		SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE
-		 | SQLITE_OPEN_NOFOLLOW | SQLITE_OPEN_MEMORY;
-	
-	if (fullFolderPath.empty()) {
-		SPDLOG_DEBUG("Creating in-memory database");
-		return sqlite3_open_v2("", &handleRef, DB_OPEN_BITS | SQLITE_OPEN_MEMORY, nullptr);
-	}
-	
 	
 	SPDLOG_DEBUG("Creating root directory: '{}'", fullFolderPath);
 	fs::create_directory(fullFolderPath);
 	fs::create_directory(fullFolderPath / Directory::PLAYLISTS);
 	
+	int sqliteOpenBits = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOFOLLOW;
+	if (storage == Sqlite3::StorageType::MEMORY) {
+		SPDLOG_DEBUG("Creating in-memory {:s}", Directory::DB_FILE);
+		sqliteOpenBits |= SQLITE_OPEN_MEMORY;
+	}
+	
 	return sqlite3_open_v2(
 		(fullFolderPath / Directory::DB_FILE).c_str(),
-		&handleRef, DB_OPEN_BITS, nullptr
+		&handleRef, sqliteOpenBits, nullptr
 	);
 }
 
@@ -165,11 +162,11 @@ Sqlite3::Sqlite3(Sqlite3 &&other) :
 	other.m_handle = nullptr;
 }
 
-Sqlite3::Sqlite3(const FilePath &fullFolderPath) :
+Sqlite3::Sqlite3(const FilePath &fullFolderPath, const StorageType storage) :
 	m_handle { nullptr },
 	m_path { fullFolderPath }
 {
-	int errCode = create_and_open_database(m_handle, fullFolderPath);
+	int errCode = create_and_open_database(m_handle, fullFolderPath, storage);
 	if (errCode != SQLITE_OK) {
 		sqlite3_close(m_handle);
 		throw std::runtime_error(fmt::format(
