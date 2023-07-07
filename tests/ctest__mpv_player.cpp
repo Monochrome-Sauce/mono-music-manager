@@ -1,15 +1,14 @@
 #define CATCH_CONFIG_FAST_COMPILE
 #include <catch2/catch.hpp>
-#include <momuma/momuma.h>
 #include <momuma/spdlog.h>
 
+#include "MpvPlayer.h"
 
-#define TEST_MEDIA_BASE_PATH "/home/ronen/myfiles/dev/github/mono-music-manager/tests"
+
 const std::array<fs::path, 2> TEST_MEDIA = {
-	TEST_MEDIA_BASE_PATH "/Bamboo Hit.mp3",
-	TEST_MEDIA_BASE_PATH "/Hare Hare Yukai.mp3",
+	fs::path(TESTING_PATH) / "Bamboo Hit.mp3",
+	fs::path(TESTING_PATH) / "Hare Hare Yukai.mp3",
 };
-#undef TEST_MEDIA_BASE_PATH
 
 
 static inline void check_mpv_error(mpv_error err)

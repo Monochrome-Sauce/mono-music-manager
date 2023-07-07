@@ -1,10 +1,3 @@
-compiler = meson.get_compiler('cpp')
-
-test_sources = files(
-	'catch_main.cpp',
-	'ctest_mpv-player.cpp',
-)
-
 # if compiler.get_id() == 'gcc'
 # 	message('Compiler = GCC')
 # 	libs_compiler = ['-lstdc++fs']
@@ -15,15 +8,45 @@ test_sources = files(
 # 	libs_linker   = ['-stdlib=libc++', '-lstdc++fs']
 # endif
 
-exe = executable('test__catch2',
+
+################################################################################
+# Variables
+
+compiler = meson.get_compiler('cpp')
+
+test_deps = [ momuma_dep, sigc_dep, catch2_dep ]
+
+extra_flags += '-DTESTING_PATH="@0@"'.format(meson.current_source_dir())
+
+test_env = environment({
+	'LSAN_OPTIONS': f'suppressions=@source_code_root@/sanitizer-blacklist.txt'
+})
+
+test_sources = files('catch_main.cpp')
+
+
+################################################################################
+# Executable tests
+
+mpv_player_test_exe = executable('mpv_player',
 	cpp_args: cxx_flags + extra_flags,
-	dependencies: [
-		momuma_dep,
-		glibmm_dep, sigc_dep, catch2_dep,
-	],
+	dependencies: test_deps,
 	implicit_include_directories : true,
-	include_directories: [ include_directory ],
-	sources: test_sources,
+	include_directories: include_directory,
+	sources: test_sources + 'ctest__mpv_player.cpp',
 )
 
-test('catch2', exe, timeout: 120)
+database_test_exe = executable('database',
+	cpp_args: cxx_flags + extra_flags,
+	dependencies: test_deps,
+	implicit_include_directories : true,
+	include_directories: include_directory,
+	sources: test_sources + 'ctest__database.cpp',
+)
+
+
+################################################################################
+# Tests
+
+test('mpv_player', database_test_exe, env: test_env, timeout: 120)
+test('database', database_test_exe, env: test_env)
