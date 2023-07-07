@@ -15,7 +15,7 @@
 
 #define ENUM_DEFINE_OP2_(EnumT, op) \
 	ENUM_DEFINE_OP_(EnumT, op) \
-	constexpr EnumT operator G_PASTE(op,=)(EnumT &lhs, EnumT rhs) { return lhs = lhs op rhs; }
+	constexpr EnumT operator ENUM_OPS_PASTE(op,=)(EnumT &lhs, EnumT rhs) { return lhs = lhs op rhs; }
 
 #define ENUM_DEFINE_OP3_(EnumT, AnotherT, op) \
 	constexpr EnumT operator op(EnumT lhs, AnotherT rhs) \
@@ -23,7 +23,7 @@
 		using T = std::underlying_type_t<EnumT>; \
 		return lhs = static_cast<EnumT>(static_cast<T>(lhs) op rhs); \
 	} \
-	constexpr EnumT operator G_PASTE(op,=)(EnumT &lhs, EnumT rhs) { return lhs = lhs op rhs; }
+	constexpr EnumT operator ENUM_OPS_PASTE(op,=)(EnumT &lhs, EnumT rhs) { return lhs = lhs op rhs; }
 
 
 

@@ -28,10 +28,12 @@ struct fmt::formatter<type> \
 };
 
 
-#include <glibmm/ustring.h>
-#define TO_STR_FROM(value) ((value).raw())
-DECLARE_FORMATTER_FOR(Glib::ustring)
-#undef TO_STR_FROM
+#ifdef _GLIBMM_USTRING_H
+	#include <glibmm/ustring.h>
+	#define TO_STR_FROM(value) ((value).raw())
+	DECLARE_FORMATTER_FOR(Glib::ustring)
+	#undef TO_STR_FROM
+#endif
 
 
 #include <filesystem>

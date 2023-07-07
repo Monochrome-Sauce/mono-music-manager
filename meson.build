@@ -56,7 +56,6 @@ asan_dep = cxx.find_library('asan')
 ubsan_dep = cxx.find_library('ubsan')
 
 catch2_dep = dependency('catch2', include_type: 'system', version: '>= 2.10')
-glibmm_dep = dependency('glibmm-2.4', include_type: 'system', version: '>= 2.60')
 mpv_dep = dependency('mpv', include_type: 'system', version: '>= 1.109')
 sigc_dep = dependency('sigc++-2.0', include_type: 'system', version: '>= 2.10')
 spdlog_dep = dependency('spdlog', include_type: 'system', version: '>= 1.9')
@@ -104,7 +103,7 @@ libmomuma = static_library(meson.project_name(),
 	dependencies: [
 		asan_dep, ubsan_dep,
 		
-		glibmm_dep, mpv_dep, sigc_dep, spdlog_dep, sqlite_dep,
+		mpv_dep, sigc_dep, spdlog_dep, sqlite_dep,
 	],
 	implicit_include_directories: true,
 	include_directories: [ include_directory, internal_directory ],
