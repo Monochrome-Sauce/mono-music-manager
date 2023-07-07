@@ -91,6 +91,33 @@ namespace Directory
 }
 
 
+[[nodiscard]] static
+int create_and_open_database(sqlite3 *&handleRef, const fs::path &fullFolderPath)
+{
+	assert(sqlite3_libversion_number() == SQLITE_VERSION_NUMBER);
+	assert(strncmp(sqlite3_sourceid(), SQLITE_SOURCE_ID, std::size(SQLITE_SOURCE_ID)) == 0);
+	assert(strcmp(sqlite3_libversion(), SQLITE_VERSION) == 0);
+	
+	constexpr auto DB_OPEN_BITS =
+		SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE
+		 | SQLITE_OPEN_NOFOLLOW | SQLITE_OPEN_MEMORY;
+	
+	if (fullFolderPath.empty()) {
+		SPDLOG_DEBUG("Creating in-memory database");
+		return sqlite3_open_v2("", &handleRef, DB_OPEN_BITS | SQLITE_OPEN_MEMORY, nullptr);
+	}
+	
+	
+	SPDLOG_DEBUG("Creating root directory: '{}'", fullFolderPath);
+	fs::create_directory(fullFolderPath);
+	fs::create_directory(fullFolderPath / Directory::PLAYLISTS);
+	
+	return sqlite3_open_v2(
+		(fullFolderPath / Directory::DB_FILE).c_str(),
+		&handleRef, DB_OPEN_BITS, nullptr
+	);
+}
+
 /* #Creates the SQL database tables
 ! @return: error code returned by the first failed sqlite3 query.
 */
@@ -127,9 +154,6 @@ int create_database_tables(sqlite3 &db)
 	);
 	
 	const int code = sqlite3_exec(&db, query.c_str(), nullptr, nullptr, nullptr);
-	if (code != SQLITE_OK) {
-		SPDLOG_CRITICAL("sqlite3_exec() failed ({:d}): {:s}", code, sqlite3_errstr(code));
-	}
 	return code;
 }
 
@@ -145,30 +169,18 @@ Sqlite3::Sqlite3(const FilePath &fullFolderPath) :
 	m_handle { nullptr },
 	m_path { fullFolderPath }
 {
-	assert(sqlite3_libversion_number() == SQLITE_VERSION_NUMBER);
-	assert(strncmp(sqlite3_sourceid(), SQLITE_SOURCE_ID, std::size(SQLITE_SOURCE_ID)) == 0);
-	assert(strcmp(sqlite3_libversion(), SQLITE_VERSION) == 0);
-	
-	SPDLOG_DEBUG("Creating root directory: '{}'", fullFolderPath);
-	fs::create_directory(fullFolderPath);
-	fs::create_directory(fullFolderPath / Directory::PLAYLISTS);
-	
-	const int code = sqlite3_open_v2((fullFolderPath / Directory::DB_FILE).c_str(), &m_handle,
-		SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX
-		 | SQLITE_OPEN_NOFOLLOW,
-		nullptr
-	);
-	
-	if (code != SQLITE_OK) {
+	int errCode = create_and_open_database(m_handle, fullFolderPath);
+	if (errCode != SQLITE_OK) {
 		sqlite3_close(m_handle);
 		throw std::runtime_error(fmt::format(
-			"sqlite3_open() failed ({:d}): {:s}", code, sqlite3_errstr(code)
+			"Failed to create database ({:d}): {:s}", errCode, sqlite3_errstr(errCode)
 		));
 	}
 	
-	if (create_database_tables(*m_handle) != SQLITE_OK) {
+	errCode = create_database_tables(*m_handle);
+	if (errCode != SQLITE_OK) {
 		const std::string e = fmt::format(
-			"Failed to initiate database ({:d}): {:s}", code, sqlite3_errstr(code)
+			"Failed to initiate database ({:d}): {:s}", errCode, sqlite3_errstr(errCode)
 		);
 		sqlite3_close(m_handle);
 		throw std::runtime_error(e);
