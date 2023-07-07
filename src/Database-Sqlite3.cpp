@@ -149,14 +149,9 @@ Sqlite3::Sqlite3(const FilePath &fullFolderPath) :
 	assert(strncmp(sqlite3_sourceid(), SQLITE_SOURCE_ID, std::size(SQLITE_SOURCE_ID)) == 0);
 	assert(strcmp(sqlite3_libversion(), SQLITE_VERSION) == 0);
 	
-	if (!std::filesystem::exists(fullFolderPath)) {
-		throw std::runtime_error(
-			fmt::format("Failed to locate database folder '{:s}'", fullFolderPath)
-		);
-	}
-	std::filesystem::create_directory(fullFolderPath / Directory::PLAYLISTS);
-	
-	SPDLOG_DEBUG("Root folder: '{}'", fullFolderPath);
+	SPDLOG_DEBUG("Creating root directory: '{}'", fullFolderPath);
+	fs::create_directory(fullFolderPath);
+	fs::create_directory(fullFolderPath / Directory::PLAYLISTS);
 	
 	const int code = sqlite3_open_v2((fullFolderPath / Directory::DB_FILE).c_str(), &m_handle,
 		SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX
