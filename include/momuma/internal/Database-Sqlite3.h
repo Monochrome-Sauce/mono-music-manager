@@ -13,9 +13,10 @@ namespace Momuma::Database
 class Sqlite3 final : public IDatabase
 {
 public:
-	Sqlite3(Sqlite3&&);
-	
 	enum class StorageType { DISK, MEMORY };
+	
+	sqlite3 *_handle;
+	
 	
 	/* #Creates (if doesn't already exist) new database inside of the folder `fullFolderPath`.
 	! @param fullFolderPath: path to the root folder of the database, created if doesn't exist.
@@ -23,7 +24,11 @@ public:
 	*/
 	Sqlite3(const FilePath &fullFolderPath, StorageType storage = StorageType::DISK);
 	
+	Sqlite3(Sqlite3&&);
+	
 	virtual ~Sqlite3(void) override;
+	
+	[[nodiscard]] explicit operator bool(void) const;
 	
 	FilePath get_database_location(void) noexcept override;
 	
@@ -38,11 +43,11 @@ public:
 	bool set_playlist_data(const std::string &playlist, const NameList &title) override;
 	
 private:
-	sqlite3 *m_handle;
 	const FilePath m_path;
+	
+	int close_handle(void);
 };
 
 }
-
 
 #endif /* DATABASE_SQLITE3_H */

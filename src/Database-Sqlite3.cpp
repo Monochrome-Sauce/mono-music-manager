@@ -154,44 +154,42 @@ int create_database_tables(sqlite3 &db)
 	return code;
 }
 
+Sqlite3::Sqlite3(const FilePath &fullFolderPath, const StorageType storage) :
+	_handle { nullptr },
+	m_path { fullFolderPath }
+{
+	int err = create_and_open_database(_handle, fullFolderPath, storage);
+	if (err != SQLITE_OK) {
+		SPDLOG_ERROR("Failed to create database ({:d}): {:s}", err, sqlite3_errstr(err));
+		this->close_handle();
+		return;
+	}
+	
+	err = create_database_tables(*_handle);
+	if (err != SQLITE_OK) {
+		SPDLOG_ERROR("Failed to initiate database ({:d}): {:s}", err, sqlite3_errstr(err));
+		this->close_handle();
+		return;
+	}
+}
+
 Sqlite3::Sqlite3(Sqlite3 &&other) :
-	m_handle { other.m_handle },
+	_handle { other._handle },
 	m_path { std::move(other.m_path) }
 {
 	assert(this != &other);
-	other.m_handle = nullptr;
-}
-
-Sqlite3::Sqlite3(const FilePath &fullFolderPath, const StorageType storage) :
-	m_handle { nullptr },
-	m_path { fullFolderPath }
-{
-	int errCode = create_and_open_database(m_handle, fullFolderPath, storage);
-	if (errCode != SQLITE_OK) {
-		sqlite3_close(m_handle);
-		throw std::runtime_error(fmt::format(
-			"Failed to create database ({:d}): {:s}", errCode, sqlite3_errstr(errCode)
-		));
-	}
-	
-	errCode = create_database_tables(*m_handle);
-	if (errCode != SQLITE_OK) {
-		const std::string e = fmt::format(
-			"Failed to initiate database ({:d}): {:s}", errCode, sqlite3_errstr(errCode)
-		);
-		sqlite3_close(m_handle);
-		throw std::runtime_error(e);
-	}
+	other._handle = nullptr;
 }
 
 Sqlite3::~Sqlite3(void)
 {
-	const int code = sqlite3_close(m_handle);
-	if (code != SQLITE_OK) {
-		SPDLOG_CRITICAL("sqlite3_close() failed ({:d}): {:s}", code, sqlite3_errstr(code));
-		return;
-	}
+	this->close_handle();
 };
+
+Sqlite3::operator bool(void) const
+{
+	return _handle != nullptr;
+}
 
 Sqlite3::FilePath Sqlite3::get_database_location(void) noexcept
 {
@@ -206,9 +204,9 @@ int Sqlite3::get_playlists(sigc::slot<IterFlag(std::string)> callback)
 	);
 	
 	SqliteStmt stmt;
-	if (const int rc = stmt.prepare(m_handle, query); rc != SQLITE_OK) {
+	if (const int rc = stmt.prepare(_handle, query); rc != SQLITE_OK) {
 		SPDLOG_ERROR("sqlite3_prepare() failed ({:d}): {:s}", rc, sqlite3_errstr(rc));
-		return false;
+		return -1;
 	}
 	
 	int rcode = 0, iterations = 0;
@@ -217,7 +215,7 @@ int Sqlite3::get_playlists(sigc::slot<IterFlag(std::string)> callback)
 		ASSERT_SQLITE_COLUMN(stmt, COLUMN, SQLITE3_TEXT, Tab::Playlists::NAME);
 		
 		const char *playlist = stmt.column_text(COLUMN);
-		if (playlist == nullptr && sqlite3_errcode(m_handle) == SQLITE_NOMEM) {
+		if (playlist == nullptr && sqlite3_errcode(_handle) == SQLITE_NOMEM) {
 			throw std::bad_alloc();
 		}
 		const int len = stmt.column_bytes(COLUMN);
@@ -255,9 +253,9 @@ int Sqlite3::get_media_paths(const std::string &playlist, sigc::slot<IterFlag(Fi
 	);
 	
 	SqliteStmt stmt;
-	if (const int rc = stmt.prepare(m_handle, query); rc != SQLITE_OK) {
+	if (const int rc = stmt.prepare(_handle, query); rc != SQLITE_OK) {
 		SPDLOG_ERROR("sqlite3_prepare() failed ({:d}): {:s}", rc, sqlite3_errstr(rc));
-		return false;
+		return -1;
 	}
 	if (stmt.bind_text(BOUND_PARAM, playlist) == SQLITE_NOMEM) { throw std::bad_alloc(); }
 	
@@ -269,7 +267,7 @@ int Sqlite3::get_media_paths(const std::string &playlist, sigc::slot<IterFlag(Fi
 		ASSERT_SQLITE_COLUMN(stmt, COLUMN, SQLITE3_TEXT, Tab::Files::NAME);
 		
 		const char *filename = stmt.column_text(COLUMN);
-		if (filename == nullptr && sqlite3_errcode(m_handle) == SQLITE_NOMEM) {
+		if (filename == nullptr && sqlite3_errcode(_handle) == SQLITE_NOMEM) {
 			throw std::bad_alloc();
 		}
 		const int len = stmt.column_bytes(COLUMN);
@@ -290,6 +288,18 @@ bool Sqlite3::set_playlist_data(const std::string &/*playlist*/, const NameList 
 {
 	assert(!bool("Not implemented"));
 	return false;
+}
+
+int Sqlite3::close_handle(void)
+{
+	const int err = sqlite3_close_v2(_handle);
+	if (err == SQLITE_OK) {
+		_handle = nullptr;
+	}
+	else {
+		SPDLOG_CRITICAL("sqlite3_close_v2() failed ({:d}): {:s}", err, sqlite3_errstr(err));
+	}
+	return err;
 }
 
 }
