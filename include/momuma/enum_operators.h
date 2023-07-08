@@ -3,7 +3,7 @@
 
 
 #define ENUM_OPS_PASTE_(identifier1,identifier2) identifier1 ## identifier2
-#define ENUM_OPS_PASTE(identifier1,identifier2) ENUMS_OPS_PASTE_(identifier1, identifier2)
+#define ENUM_OPS_PASTE(identifier1,identifier2) ENUM_OPS_PASTE_(identifier1, identifier2)
 
 
 #define ENUM_DEFINE_OP_(EnumT, op) \
