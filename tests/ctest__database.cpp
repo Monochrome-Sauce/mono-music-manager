@@ -10,12 +10,13 @@ namespace Db = Momuma::Database;
 [[nodiscard]] static inline
 Db::Sqlite3 make_database(void)
 {
-	return Db::Sqlite3(TESTING_PATH, Db::Sqlite3::StorageType::MEMORY);
+	Db::Sqlite3 db(TESTING_PATH, Db::Sqlite3::StorageType::MEMORY);
+	REQUIRE(static_cast<bool>(db));
+	return db;
 }
 
-TEST_CASE("db test", "[query]")
+TEST_CASE("create database", "[]")
 {
-	spdlog::critical("Hello world");
 	auto db = make_database();
-	REQUIRE(db.get_database_location().empty());
+	REQUIRE(db.get_database_location() == TESTING_PATH);
 }
