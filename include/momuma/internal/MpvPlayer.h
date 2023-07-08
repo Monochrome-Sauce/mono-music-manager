@@ -3,7 +3,8 @@
 
 #include <filesystem>
 #include <mpv/client.h>
-#include <sigc++/signal.h>
+
+#include "momuma/sigc.h"
 
 
 namespace Momuma
