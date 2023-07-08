@@ -32,6 +32,8 @@ public:
 	Momuma(const Momuma&) = delete;
 	Momuma& operator=(const Momuma&) = delete;
 	
+	[[nodiscard]] explicit operator bool(void);
+	
 	[[nodiscard]] MpvPlayer& get_player(void) { return m_player; }
 	[[nodiscard]] Database::Sqlite3& get_database(void) { return m_database; }
 	
