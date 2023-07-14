@@ -1,5 +1,5 @@
-#ifndef IDATABASE_H
-#define IDATABASE_H
+#ifndef MONO_MUSIC_MANAGER__INTERNAL__IDATABASE_H
+#define MONO_MUSIC_MANAGER__INTERNAL__IDATABASE_H
 
 #include <filesystem>
 #include <optional>
@@ -79,4 +79,4 @@ public:
 
 }
 
-#endif /* IDATABASE_H */
+#endif /* MONO_MUSIC_MANAGER__INTERNAL__IDATABASE_H */

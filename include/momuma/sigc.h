@@ -1,5 +1,5 @@
-#ifndef MONO_MUSIC_MANAGER__LIBS__CALLBACK
-#define MONO_MUSIC_MANAGER__LIBS__CALLBACK
+#ifndef MONO_MUSIC_MANAGER__SIGC
+#define MONO_MUSIC_MANAGER__SIGC
 
 #include <sigc++/sigc++.h>
 
@@ -10,4 +10,4 @@ namespace sigc
 	constexpr bool AFTER = !BEFORE;
 }
 
-#endif /* MONO_MUSIC_MANAGER__LIBS__CALLBACK */
+#endif /* MONO_MUSIC_MANAGER__SIGC */

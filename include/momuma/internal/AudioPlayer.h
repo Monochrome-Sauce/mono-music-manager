@@ -1,5 +1,5 @@
-#ifndef AUDIO_PLAYER_H
-#define AUDIO_PLAYER_H
+#ifndef MONO_MUSIC_MANAGER__AUDIO_PLAYER_H
+#define MONO_MUSIC_MANAGER__AUDIO_PLAYER_H
 
 #include <chrono>
 #include <filesystem>
@@ -124,4 +124,4 @@ private:
 
 }
 
-#endif /* AUDIO_PLAYER_H */
+#endif /* MONO_MUSIC_MANAGER__AUDIO_PLAYER_H */

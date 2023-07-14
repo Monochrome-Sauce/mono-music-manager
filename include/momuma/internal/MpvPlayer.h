@@ -1,5 +1,5 @@
-#ifndef MPV_PLAYER_H
-#define MPV_PLAYER_H
+#ifndef MONO_MUSIC_MANAGER__INTERNAL__MPV_PLAYER_H
+#define MONO_MUSIC_MANAGER__INTERNAL__MPV_PLAYER_H
 
 #include <filesystem>
 #include <mpv/client.h>
@@ -136,4 +136,4 @@ private:
 
 }
 
-#endif /* MPV_PLAYER_H */
+#endif /* MONO_MUSIC_MANAGER__INTERNAL__MPV_PLAYER_H */

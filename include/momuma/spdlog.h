@@ -1,7 +1,7 @@
 // used to add custom formatters in a central location
 
-#ifndef MONO_MUSIC_MANAGER__LIBS__SPDLOG_H
-#define MONO_MUSIC_MANAGER__LIBS__SPDLOG_H
+#ifndef MONO_MUSIC_MANAGER__SPDLOG_H
+#define MONO_MUSIC_MANAGER__SPDLOG_H
 
 #ifdef NDEBUG
 	#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
@@ -68,4 +68,4 @@ DECLARE_FORMATTER_FOR(chrono::duration<double>)
 
 
 #undef DECLARE_FORMATTER_FOR
-#endif /* MONO_MUSIC_MANAGER__LIBS__SPDLOG_H */
+#endif /* MONO_MUSIC_MANAGER__SPDLOG_H */

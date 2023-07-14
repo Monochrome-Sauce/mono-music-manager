@@ -1,5 +1,5 @@
-#ifndef UTILS__CONSTANTS_H
-#define UTILS__CONSTANTS_H
+#ifndef MONO_MUSIC_MANAGER__INTERNAL__CONSTANTS_H
+#define MONO_MUSIC_MANAGER__INTERNAL__CONSTANTS_H
 
 #include <filesystem>
 
@@ -15,4 +15,4 @@ bool is_filename_forbidden(std::filesystem::path filename);
 
 }
 
-#endif /* UTILS__CONSTANTS_H */
+#endif /* MONO_MUSIC_MANAGER__INTERNAL__CONSTANTS_H */
