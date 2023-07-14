@@ -30,6 +30,8 @@ struct SqliteStmt
 	SqliteStmt(void) : _p { nullptr } {}
 	~SqliteStmt(void) { (void)this->finalize(); }
 	
+	[[nodiscard]] inline bool operator==(const SqliteStmt &other) const { return _p == other._p; }
+	
 	[[nodiscard]] inline int bind_text(int iParam, const std::string &value)
 	{
 		return sqlite3_bind_text(_p,
@@ -133,7 +135,7 @@ int create_database_tables(sqlite3 &db)
 	);
 	query += fmt::format(
 		R"(CREATE TABLE IF NOT EXISTS [{}] (
-			[{}] INTEGER NOT NULL, [{}] TEXT NOT NULL,
+			[{}] INTEGER NOT NULL, [{}] TEXT NOT NULL UNIQUE,
 			PRIMARY KEY([{}] AUTOINCREMENT)
 		) STRICT;)",
 		Tab::PLAYLISTS,
@@ -232,6 +234,34 @@ int Sqlite3::get_playlists(sigc::slot<IterFlag(std::string)> callback)
 	return iterations;
 }
 
+bool Sqlite3::create_playlist(const std::string &playlist)
+{
+	constexpr int BOUND_PARAM = 1;
+	static const std::string query = fmt::format(
+		R"(INSERT INTO [{}] ([{}]) VALUES(?{:d});)",
+		Tab::PLAYLISTS, Tab::Playlists::NAME, BOUND_PARAM
+	);
+	
+	SqliteStmt stmt;
+	if (const int rc = stmt.prepare(_handle, query); rc != SQLITE_OK) {
+		SPDLOG_ERROR("sqlite3_prepare() failed ({:d}): {:s}", rc, sqlite3_errstr(rc));
+		return false;
+	}
+	if (stmt.bind_text(BOUND_PARAM, playlist) == SQLITE_NOMEM) {
+		throw std::bad_alloc();
+	}
+	
+	const int rc = stmt.step();
+	SPDLOG_DEBUG("Adding playlist '{}' - ({:d}): {:s}", playlist, rc, sqlite3_errstr(rc));
+	switch (rc)
+	{
+	case SQLITE_CONSTRAINT: // happens when the playlist already exists
+	case SQLITE_DONE:
+		return true;
+	default:
+		return false;
+	}
+}
 
 bool Sqlite3::remove_playlist(const std::string &/*playlist*/)
 {

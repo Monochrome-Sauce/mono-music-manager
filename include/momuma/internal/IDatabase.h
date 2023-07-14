@@ -41,6 +41,13 @@ public:
 	[[nodiscard]] virtual
 	int get_playlists(sigc::slot<IterFlag(std::string)> callback) = 0;
 	
+	/* #Creates a new playlist in the database.
+	! @param playlist: name of the new playlist.
+	! @return: 'false' if the playlist doesn't exist at the end of the operation.
+	*/
+	[[nodiscard]] virtual
+	bool create_playlist(const std::string &playlist) = 0;
+	
 	/* #Removes the given playlist from the database.
 	! @param playlist: name of a playlist to remove.
 	! @return: `true` on success. If `false` is returned, the existing list didn't change.

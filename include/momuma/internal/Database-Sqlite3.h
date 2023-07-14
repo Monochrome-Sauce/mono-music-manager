@@ -34,6 +34,8 @@ public:
 	
 	int get_playlists(sigc::slot<IterFlag(std::string)> callback) override;
 	
+	bool create_playlist(const std::string &playlist) override;
+	
 	bool remove_playlist(const std::string &playlist) override;
 	
 	int get_media_paths(
