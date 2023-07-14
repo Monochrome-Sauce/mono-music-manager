@@ -1,7 +1,7 @@
 #ifndef MONO_MUSIC_MANAGER__LIBS__CALLBACK
 #define MONO_MUSIC_MANAGER__LIBS__CALLBACK
 
-#include <sigc++/signal.h>
+#include <sigc++/sigc++.h>
 
 namespace sigc
 {
