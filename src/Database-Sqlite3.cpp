@@ -95,7 +95,7 @@ namespace Directory
 
 [[nodiscard]] static
 int create_and_open_database(
-	sqlite3 *&handleRef, const fs::path &fullFolderPath, const Sqlite3::StorageType storage
+	sqlite3 *&handleRef, const fs::path &fullFolderPath, const StorageType storage
 ) {
 	assert(sqlite3_libversion_number() == SQLITE_VERSION_NUMBER);
 	assert(strncmp(sqlite3_sourceid(), SQLITE_SOURCE_ID, std::size(SQLITE_SOURCE_ID)) == 0);
@@ -106,7 +106,7 @@ int create_and_open_database(
 	fs::create_directory(fullFolderPath / Directory::PLAYLISTS);
 	
 	int sqliteOpenBits = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOFOLLOW;
-	if (storage == Sqlite3::StorageType::MEMORY) {
+	if (storage == StorageType::MEMORY) {
 		SPDLOG_DEBUG("Creating in-memory {:s}", Directory::DB_FILE);
 		sqliteOpenBits |= SQLITE_OPEN_MEMORY;
 	}
@@ -156,7 +156,7 @@ int create_database_tables(sqlite3 &db)
 	return code;
 }
 
-Sqlite3::Sqlite3(const FilePath &fullFolderPath, const StorageType storage) :
+Sqlite3::Sqlite3(const fs::path &fullFolderPath, const StorageType storage) :
 	_handle { nullptr },
 	m_path { fullFolderPath }
 {
@@ -193,7 +193,7 @@ Sqlite3::operator bool(void) const
 	return _handle != nullptr;
 }
 
-Sqlite3::FilePath Sqlite3::get_database_location(void) noexcept
+fs::path Sqlite3::get_database_location(void) noexcept
 {
 	return m_path;
 }
@@ -269,7 +269,7 @@ bool Sqlite3::remove_playlist(const std::string &/*playlist*/)
 	return false;
 }
 
-int Sqlite3::get_media_paths(const std::string &playlist, sigc::slot<IterFlag(FilePath)> callback)
+int Sqlite3::get_media_paths(const std::string &playlist, sigc::slot<IterFlag(fs::path)> callback)
 {
 	// location to insert `playlist` in the query (to avoid an SQL injection).
 	constexpr int BOUND_PARAM = 1;
@@ -289,7 +289,7 @@ int Sqlite3::get_media_paths(const std::string &playlist, sigc::slot<IterFlag(Fi
 	}
 	if (stmt.bind_text(BOUND_PARAM, playlist) == SQLITE_NOMEM) { throw std::bad_alloc(); }
 	
-	const FilePath base = this->get_database_location() / Directory::PLAYLISTS / playlist;
+	const fs::path base = this->get_database_location() / Directory::PLAYLISTS / playlist;
 	
 	int rcode = 0, iterations = 0;
 	while ((rcode = stmt.step()) == SQLITE_ROW) {
@@ -303,7 +303,7 @@ int Sqlite3::get_media_paths(const std::string &playlist, sigc::slot<IterFlag(Fi
 		const int len = stmt.column_bytes(COLUMN);
 		
 		++iterations;
-		const IterFlag res = callback(base / FilePath(&filename[0], &filename[len]));
+		const IterFlag res = callback(base / fs::path(&filename[0], &filename[len]));
 		if (res == IterFlag::STOP) { return iterations; }
 	}
 	
@@ -314,7 +314,7 @@ int Sqlite3::get_media_paths(const std::string &playlist, sigc::slot<IterFlag(Fi
 	return iterations;
 }
 
-bool Sqlite3::set_playlist_data(const std::string &/*playlist*/, const NameList &/*mediaPath*/)
+bool Sqlite3::set_playlist_data(const std::string&, const std::vector<fs::path>&)
 {
 	assert(!bool("Not implemented"));
 	return false;

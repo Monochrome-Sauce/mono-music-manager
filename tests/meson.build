@@ -12,8 +12,6 @@
 ################################################################################
 # Variables
 
-compiler = meson.get_compiler('cpp')
-
 test_deps = [ momuma_dep, sigc_dep, catch2_dep ]
 
 extra_flags += '-DTESTING_PATH="@0@"'.format(meson.current_source_dir())
